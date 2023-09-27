@@ -19,6 +19,7 @@ import UIKit
 import Metal
 import Accelerate
 
+
 class MetalGraph {
     
     //MARK: MTL Properties

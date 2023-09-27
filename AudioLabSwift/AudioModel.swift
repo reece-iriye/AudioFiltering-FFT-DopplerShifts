@@ -9,6 +9,7 @@
 import Foundation
 import Accelerate
 
+
 class AudioModel {
     
     // MARK: Properties

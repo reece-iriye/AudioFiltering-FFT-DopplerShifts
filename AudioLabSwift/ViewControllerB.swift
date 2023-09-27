@@ -1,12 +1,5 @@
-//
-//  Part3ViewController.swift
-//  AudioLabSwift
-//
-//  Created by Chris Miller on 9/25/23.
-//  Copyright © 2023 Eric Larson. All rights reserved.
-//
-
 import UIKit
+
 
 class ViewControllerB: UIViewController {
     @IBOutlet weak var userView: UIView!
