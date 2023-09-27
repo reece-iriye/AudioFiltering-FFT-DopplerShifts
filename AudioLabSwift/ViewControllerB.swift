@@ -8,7 +8,7 @@
 
 import UIKit
 
-class Part3ViewController: UIViewController {
+class ViewControllerB: UIViewController {
     @IBOutlet weak var userView: UIView!
     struct AudioConstants{
         static let AUDIO_BUFFER_SIZE = 1024*4

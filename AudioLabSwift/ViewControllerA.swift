@@ -1,7 +1,7 @@
 import UIKit
 import Metal
 
-class ViewController: UIViewController {
+class ViewControllerA: UIViewController {
 
     @IBOutlet weak var userView: UIView!
     struct AudioConstants{
