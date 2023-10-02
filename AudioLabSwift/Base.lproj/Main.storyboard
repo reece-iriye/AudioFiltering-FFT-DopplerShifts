@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="XIS-79-vaC">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="XIS-79-vaC">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21679"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -27,7 +27,7 @@
                                             <rect key="frame" x="0.0" y="0.0" width="414" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Part Two Cell" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="Jsx-q7-WhE">
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Module A" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="Jsx-q7-WhE">
                                                     <rect key="frame" x="20" y="0.0" width="374" height="43.5"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="0.0"/>
@@ -47,7 +47,7 @@
                                             <rect key="frame" x="0.0" y="0.0" width="414" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Part Three Cell" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="XwP-mu-jbd">
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Module B" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="XwP-mu-jbd">
                                                     <rect key="frame" x="20" y="0.0" width="374" height="43.5"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="0.0"/>
@@ -134,23 +134,44 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="OWy-g2-tIN">
-                                <rect key="frame" x="20" y="101.5" width="374" height="751"/>
+                                <rect key="frame" x="20" y="127" width="374" height="700"/>
                                 <color key="backgroundColor" systemColor="opaqueSeparatorColor"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="751" id="2HO-hh-ujE"/>
+                                    <constraint firstAttribute="height" constant="700" id="2HO-hh-ujE"/>
                                     <constraint firstAttribute="width" constant="374" id="QGt-xd-PZS"/>
                                 </constraints>
                             </view>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VAq-MU-ld5">
+                                <rect key="frame" x="186" y="71" width="42" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" systemColor="opaqueSeparatorColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Fuf-EF-ZyA">
+                                <rect key="frame" x="114.5" y="92" width="185" height="35"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="^ Pause Frequency ^"/>
+                                <connections>
+                                    <action selector="lockIn:" destination="emK-Jh-f7z" eventType="touchUpInside" id="rks-An-eu0"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="CM5-gf-aWz"/>
                         <color key="backgroundColor" systemColor="labelColor"/>
                         <constraints>
                             <constraint firstItem="OWy-g2-tIN" firstAttribute="centerX" secondItem="CM5-gf-aWz" secondAttribute="centerX" id="GjL-b7-yxM"/>
+                            <constraint firstItem="Fuf-EF-ZyA" firstAttribute="top" secondItem="VAq-MU-ld5" secondAttribute="bottom" id="J1s-aq-aec"/>
+                            <constraint firstItem="Fuf-EF-ZyA" firstAttribute="centerX" secondItem="CM5-gf-aWz" secondAttribute="centerX" id="L19-Jk-Zw8"/>
+                            <constraint firstItem="OWy-g2-tIN" firstAttribute="top" secondItem="Fuf-EF-ZyA" secondAttribute="bottom" id="Ytq-V6-xV2"/>
+                            <constraint firstItem="VAq-MU-ld5" firstAttribute="centerX" secondItem="CM5-gf-aWz" secondAttribute="centerX" id="c9h-mm-ubi"/>
                             <constraint firstItem="OWy-g2-tIN" firstAttribute="centerY" secondItem="CM5-gf-aWz" secondAttribute="centerY" id="ki9-AQ-uDP"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="zHN-Rv-S35"/>
+                    <navigationItem key="navigationItem" id="zHN-Rv-S35">
+                        <nil key="title"/>
+                    </navigationItem>
                     <connections>
+                        <outlet property="maxLabel" destination="VAq-MU-ld5" id="OM6-hp-uNe"/>
                         <outlet property="userView" destination="OWy-g2-tIN" id="l30-U3-osb"/>
                     </connections>
                 </viewController>

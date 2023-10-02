@@ -87,6 +87,37 @@ class AudioModel {
         }
     }
     
+    func getTone() -> [Float] {
+        let f2 = Float(self.audioManager!.samplingRate) / Float(fftData.count)/2
+        var max1:Float = 0.0
+        var max2:Float = 0.0
+        
+        var m2:Float = 0.0
+        let windowSize = fftData.count / 100
+        for i in 0..<100 {
+            let startIdx = i * windowSize
+            vDSP_maxv(
+                &fftData + startIdx,
+                1,
+                &m2,
+                vDSP_Length(windowSize)
+            )
+            let maxIndex = Int(fftData.firstIndex(of: m2)!) // Index of local Maximum
+            let m1 = fftData[max(maxIndex - 1, 0)]
+            let m3 = fftData[maxIndex + 1]
+            if(m2 > 0 && m1 < m2 && m2 > fftData[maxIndex + 1]){ // If value is positive and true local max
+                if(max1 == 0.0){
+                    max1 = Float(maxIndex)*f2 + (m1 - m3)/(m3 - 2*m2 + m1) * f2/2
+                }
+                else if(max2 == 0.0){
+                    max2 = Float(maxIndex)*f2 + (m1 - m3)/(m3 - 2*m2 + m1) * f2/2
+                }
+            }
+        }
+        
+        return [max1, max2]
+    }
+    
     //==========================================
     // MARK: Private Properties
     private lazy var audioManager:Novocaine? = {
