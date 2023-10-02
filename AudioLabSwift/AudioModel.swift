@@ -92,25 +92,25 @@ class AudioModel {
         var max1:Float = 0.0
         var max2:Float = 0.0
         
-        var tempMax:Float = 0.0
+        var m2:Float = 0.0
         let windowSize = fftData.count / 100
         for i in 0..<100 {
             let startIdx = i * windowSize
             vDSP_maxv(
                 &fftData + startIdx,
                 1,
-                &tempMax,
+                &m2,
                 vDSP_Length(windowSize)
             )
-            
-            let tempIndex = Int(fftData.firstIndex(of: tempMax)!)
-            if(tempMax > 0 && fftData[tempIndex - 1] < tempMax && tempMax > fftData[tempIndex + 1]){
-                print(tempMax, Float(tempIndex)*f2, i)
+            let maxIndex = Int(fftData.firstIndex(of: m2)!) // Index of local Maximum
+            let m1 = fftData[max(maxIndex - 1, 0)]
+            let m3 = fftData[maxIndex + 1]
+            if(m2 > 0 && m1 < m2 && m2 > fftData[maxIndex + 1]){ // If value is positive and true local max
                 if(max1 == 0.0){
-                    max1 = Float(tempIndex)*f2
+                    max1 = Float(maxIndex)*f2 + (m1 - m3)/(m3 - 2*m2 + m1) * f2/2
                 }
                 else if(max2 == 0.0){
-                    max2 = Float(tempIndex)*f2
+                    max2 = Float(maxIndex)*f2 + (m1 - m3)/(m3 - 2*m2 + m1) * f2/2
                 }
             }
         }
