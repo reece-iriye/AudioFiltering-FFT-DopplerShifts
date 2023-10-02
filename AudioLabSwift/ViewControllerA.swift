@@ -3,10 +3,17 @@ import Metal
 
 
 class ViewControllerA: UIViewController {
+    var lockIn:Bool = true
+    var labelText:String = "0.0 fkasdjhfalskjfhlsakjfasdlkjfhaslkd"
 
     @IBOutlet weak var userView: UIView!
     struct AudioConstants{
         static let AUDIO_BUFFER_SIZE = 1024*4
+    }
+    
+    @IBOutlet weak var maxLabel: UILabel!
+    @IBAction func lockIn(_ sender: Any) {
+        lockIn = !lockIn
     }
     
     // setup audio model
@@ -14,6 +21,7 @@ class ViewControllerA: UIViewController {
     lazy var graph:MetalGraph? = {
         return MetalGraph(userView: self.userView)
     }()
+
     
     
     override func viewDidLoad() {
@@ -66,6 +74,7 @@ class ViewControllerA: UIViewController {
         audio.play()
     }
     
+    var counter:Int = 31
     // periodically, update the graph with refreshed FFT Data
     func updateGraph() {
         
@@ -85,6 +94,15 @@ class ViewControllerA: UIViewController {
                 forKey: "bufferSize20Graph"
             )
         }
-        
+        if(lockIn && counter > 30){
+            let tone = self.audio.getTone()
+            labelText = String(format: "%.2f, %2f", tone[0], tone[1])
+            maxLabel.text = labelText
+            counter = 0
+        }
+        else{
+            counter += 1;
+            maxLabel.text = labelText
+        }
     }
 }
