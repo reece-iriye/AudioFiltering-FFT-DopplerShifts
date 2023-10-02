@@ -14,16 +14,18 @@ class AudioModel {
     
     // MARK: Properties
     private var BUFFER_SIZE:Int
-    // thse properties are for interfaceing with the API
-    // the user can access these arrays at any time and plot them if they like
+    // These properties are for interfaceing with the API
+    // The user can access these arrays at any time and plot them if they like
     var timeData:[Float]
     var fftData:[Float]
     var maxDataSize20:[Float]  // size 20 array for max frequency per buffer
     
     // MARK: Public Methods
     init(buffer_size:Int) {
+        // Indicate buffer size of the array
         BUFFER_SIZE = buffer_size
-        // anything not lazily instatntiated should be allocated here
+        
+        // Anything not lazily instatntiated should be allocated here
         timeData = Array.init(repeating: 0.0, count: BUFFER_SIZE)
         fftData = Array.init(repeating: 0.0, count: BUFFER_SIZE/2)
         maxDataSize20 = Array.init(repeating: 0.0, count: 20)
@@ -47,7 +49,6 @@ class AudioModel {
     
     func startProcesingAudioFileForPlayback(){
         self.audioManager?.outputBlock = self.handleSpeakerQueryWithAudioFile
-//        self.audioManager?.inputBlock = self.handleSpeaker
         
         Timer.scheduledTimer(withTimeInterval: 1.0/20, repeats: true) { _ in
             self.runEveryInterval()
@@ -63,6 +64,7 @@ class AudioModel {
         }
     }
     
+    // You must call this when you want the audio to be paused by our model
     func pause(){
         if let manager = self.audioManager{
             manager.pause()
@@ -110,16 +112,18 @@ class AudioModel {
     //==========================================
     // MARK: Private Methods
     private lazy var fileReader:AudioFileReader? = {
-        
-        if let url = Bundle.main.url(forResource: "satisfaction", withExtension: "mp3"){
+        // Read in the file for playing the song `Satisfaction` by the Rolling Stones
+        if let url = Bundle.main.url(forResource: "satisfaction", withExtension: "mp3") {
+            // Use sampling rate and output channel count indicated by Novocaine audio manager
             var tmpFileReader:AudioFileReader? = AudioFileReader.init(audioFileURL: url,
                                                    samplingRate: Float(audioManager!.samplingRate),
                                                    numChannels: audioManager!.numOutputChannels)
-            
+            // Setthe initial time equal to 0.0s for playback
             tmpFileReader!.currentTime = 0.0
-            print("Audio file succesfully loaded for \(url)")
+            print("Audio file succesfully loaded for \(url)")  // output success for audio file reading
             return tmpFileReader
-        }else{
+        } else {
+            // Failed to read in the audio file, return `nil`
             print("Could not initialize audio input file")
             return nil
         }
@@ -141,7 +145,6 @@ class AudioModel {
             //   timeData: the raw audio samples
             //   fftData:  the FFT of those same samples
             // the user can now use these variables however they like
-            
             updateMaxFrequencyAmplitude()
         }
     }

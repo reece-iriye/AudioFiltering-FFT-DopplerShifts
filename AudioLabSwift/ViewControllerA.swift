@@ -15,7 +15,6 @@ class ViewControllerA: UIViewController {
         return MetalGraph(userView: self.userView)
     }()
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
