@@ -94,7 +94,7 @@ class ViewControllerA: UIViewController {
                 forKey: "bufferSize20Graph"
             )
         }
-        if(lockIn && counter > 30){
+        if(lockIn && counter > 10){
             let tone = self.audio.getTone()
             labelText = String(format: "Frequencies: %.2f, %.2f hz", tone[0], tone[1])
             maxLabel.text = labelText
