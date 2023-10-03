@@ -45,9 +45,10 @@ class AudioModel {
         }
     }
     
-    func startProcesingAudioFileForPlayback(){
+    /*func startProcesingAudioFileForPlayback(){
         self.audioManager?.outputBlock = self.handleSpeakerQueryWithAudioFile
 //        self.audioManager?.inputBlock = self.handleSpeaker
+     
         
         Timer.scheduledTimer(withTimeInterval: 1.0/20, repeats: true) { _ in
             self.runEveryInterval()
@@ -55,7 +56,7 @@ class AudioModel {
         
         self.fileReader?.play()
     }
-    
+    */
     // You must call this when you want the audio to start being handled by our model
     func play(){
         if let manager = self.audioManager{
