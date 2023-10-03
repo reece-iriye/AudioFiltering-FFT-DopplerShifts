@@ -88,7 +88,8 @@ class AudioModel {
     }
     
     func getTone() -> [Float] {
-        let f2 = Float(self.audioManager!.samplingRate) / Float(fftData.count)/2
+        
+        let f2 = Float(self.audioManager!.samplingRate) / Float(fftData.count)
         var max1:Float = 0.0
         var max2:Float = 0.0
         
@@ -177,7 +178,7 @@ class AudioModel {
         }
     }
     
-    private func handleMicrophone (data:Optional<UnsafeMutablePointer<Float>>, numFrames:UInt32, numChannels: UInt32) {
+    private func handleMicrophone(data:Optional<UnsafeMutablePointer<Float>>, numFrames:UInt32, numChannels: UInt32) {
         // copy samples from the microphone into circular buffer
         self.inputBuffer?.addNewFloatData(data, withNumSamples: Int64(numFrames))
     }
