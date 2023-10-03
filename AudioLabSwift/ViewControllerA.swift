@@ -95,7 +95,9 @@ class ViewControllerA: UIViewController {
             )
         }
         if(lockIn && counter > 10){
-            let tone = self.audio.getTone()
+            //let tone = //self.audio.getTone()
+            let tone = audio.updatePeakFrequencyAmplitude()
+            print("Tone: ", tone[0])
             labelText = String(format: "Frequencies: %.2f, %.2f hz", tone[0], tone[1])
             maxLabel.text = labelText
             counter = 0

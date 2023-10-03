@@ -10,6 +10,14 @@ import Foundation
 import Accelerate
 
 
+struct FFTPeakModel {
+    var m2: Float
+    var m1: Float
+    var m3: Float
+    var f2: Int
+    var approxPeak: Float
+}
+
 class AudioModel {
     
     // MARK: Properties
@@ -28,6 +36,105 @@ class AudioModel {
         fftData = Array.init(repeating: 0.0, count: BUFFER_SIZE/2)
         maxDataSize20 = Array.init(repeating: 0.0, count: 20)
     }
+    
+   
+   // Method to find and return peaks from the FFT data.
+   func findPeaks() -> [FFTPeakModel] {
+       // An array to store detected peaks in FFT data.
+       var peakList: [FFTPeakModel] = []
+       
+       // Use a guard statement to safely unwrap the sampling rate.
+       // If it fails, return an empty peakList.
+       guard let actualSamplingRate = self.audioManager?.samplingRate else {
+           print("Error: Sampling rate is nil.")
+           return peakList
+       }
+       
+       // Calculating frequency resolution using the sampling rate and fftData count.
+       let freqResolution = Float(actualSamplingRate) / Float(fftData.count)
+
+       // Iterating through each index of fftData, avoiding the first and last indexes.
+       for idx in 1...(fftData.count - 2) {
+           // Checking if current index (idx) is a peak by comparing it with its neighbors.
+           if fftData[idx] > fftData[idx-1] && fftData[idx] > fftData[idx+1] {
+               // Assigning magnitude values for current and neighboring indexes for later calculations.
+               let m1 = fftData[idx-1]
+               let m2 = fftData[idx]
+               let m3 = fftData[idx+1]
+               
+               // Quadratic interpolation to find the approximate true peak frequency.
+               let p = (m1 - m3) / (2 * (m3 - (2 * m2) + m1))
+               // Calculating the approximated peak frequency.
+               print("m1: ", m1)
+               print(" m2: ", m2)
+               print(" m3: ", m3)
+               print("idx: ", idx)
+               let approxPeakFreq: Float = (Float(idx) + ((m1 - m3) / ((m3 - (2 * m2) + m1)))) * 93.75
+               print("approx: ", approxPeakFreq)
+               /*Float(idx) * freqResolution + p * freqResolution / 2*/
+               
+               // Constructing a peak model object and appending it to peakList.
+               let fftPeak = FFTPeakModel(
+                   m2: m2,
+                   m1: m1,
+                   m3: m3,
+                   f2: idx,
+                   approxPeak: approxPeakFreq
+               )
+               peakList.append(fftPeak)
+           }
+       }
+       // Returning the list of detected peaks.
+       return peakList
+    }
+    
+    // Function to find the top 2 distinct peaks
+    func findTopDistinctPeaks() -> [FFTPeakModel] {
+        
+        // Call the function to obtain all of the sampled peaks
+        let peakList: [FFTPeakModel] = self.findPeaks()
+        
+        // Use a guard statement to safely unwrap the sampling rate.
+        // If it fails, return an empty peakList.
+        guard let actualSamplingRate = self.audioManager?.samplingRate else {
+            print("Error: Sampling rate is nil.")
+            return peakList
+        }
+        
+        // Initialize an empty array that will eventually be populated with top peaks
+        var topPeaks: [FFTPeakModel] = []
+        
+        // Sort peaks by magnitude
+        let sortedPeaks = peakList.sorted { (peak1, peak2) -> Bool in
+            return peak1.m2 > peak2.m2
+        }
+        
+        // Check if there exists a first peak before executing the code block inside
+        if let firstPeak = sortedPeaks.first {
+            // Add the maximum peak immediately to the topPeaks array before labeling the second highest
+            topPeaks.append(firstPeak)
+            
+            // Iterate through the sorted peaks
+            for peak in sortedPeaks {
+                // Check if the peak is distinct and add to the top peaks if it is
+                // Also ensure that the distance between the peaks is at least 50 Hz
+                let isDistinct: Bool = topPeaks.allSatisfy { (existingPeak) -> Bool in
+                    return abs(Float(peak.f2 - existingPeak.f2) * actualSamplingRate / self.fftData.count) >= 50.0
+                }
+                if isDistinct {
+                    topPeaks.append(peak)
+                    
+                    // Exit the loop once 2 peaks are found
+                    if topPeaks.count >= 2 {
+                        break
+                    }
+                }
+            }
+        }
+        // Return the top 2 distinct peaks.
+        return topPeaks
+    }
+    
     
     // public function for starting processing of microphone data
     func startMicrophoneProcessing(withFps:Double){
@@ -69,6 +176,23 @@ class AudioModel {
         }
     }
     
+    // Function to update the peak frequencies.
+    func updatePeakFrequencyAmplitude() -> [Float] {
+        // Use AudioModel's method to find peaks. No need to pass sampling rate externally.
+        let peakList = self.findTopDistinctPeaks()
+        print("THE VALUE IN PEAKLIST IS \(peakList)")
+        
+        // Map peakList to retrieve approximate peak frequencies and display them
+        let peakFrequencies = peakList.map { peakModel in
+            return peakModel.approxPeak
+        }
+        
+        //print("Peak Frequencies: \(peakFrequencies)")
+        
+        return peakFrequencies
+    }
+    
+   
     func updateMaxFrequencyAmplitude() {
         // Window size for each slice of the FFT array
         let windowSize = fftData.count / maxDataSize20.count
@@ -104,8 +228,12 @@ class AudioModel {
             )
             let maxIndex = Int(fftData.firstIndex(of: m2)!) // Index of local Maximum
             let m1 = fftData[max(maxIndex - 1, 0)]
+            //print(m1)
             let m3 = fftData[maxIndex + 1]
+//            print("m2: " , m2)
+//            print("m1: ", m1)
             if(m2 > 0 && m1 < m2 && m2 > fftData[maxIndex + 1]){ // If value is positive and true local max
+                print("here")
                 if(max1 == 0.0){
                     max1 = Float(maxIndex)*f2 + (m1 - m3)/(m3 - 2*m2 + m1) * f2/2
                 }
@@ -114,9 +242,35 @@ class AudioModel {
                 }
             }
         }
-        
+        //print("max1: ", max1)
         return [max1, max2]
     }
+    
+//    struct FFTPeakModel {
+//        var m2: Float;
+//        var m1: Float;
+//        var m3: Float;
+//        var f2: Int;  // Index of fftData
+//        // Potentially interpolation value too
+//    }
+//    
+//    var peakList: [self.FFTPeakModel]
+//    
+//    // Iterate through FFTData
+//    for idx in 1...(fftData.count - 2) {
+//        if fftData[idx] > fftData[idx-1] && fftData[idx] > fftData[idx+1] {
+//            var fftPeak = self.FFTPeak(
+//                m2: fftData[idx],
+//                m1: fftData[idx-1],
+//                m3: fftData[idx+1],
+//                f2: idx,
+//            )
+//            
+//            peakList.append(contentsOf: fftPeak)
+//        }
+//    }
+    
+    
     
     //==========================================
     // MARK: Private Properties

@@ -45,6 +45,7 @@ class ViewControllerB: UIViewController {
         // run the loop for updating the graph peridocially
         Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { _ in
             self.updateGraph()
+//            self.updatePeakFrequencyLabel()
         }
        
     }
