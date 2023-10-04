@@ -122,13 +122,6 @@
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Current Volume: 0 decibels" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="meL-ff-xcp">
-                                <rect key="frame" x="49" y="92" width="317" height="50"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="No Motion" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dQP-xy-Mz1">
                                 <rect key="frame" x="77" y="142" width="260" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -146,7 +139,6 @@
                     </view>
                     <navigationItem key="navigationItem" id="w4f-48-CPa"/>
                     <connections>
-                        <outlet property="decibelLabel" destination="meL-ff-xcp" id="TNs-it-UrA"/>
                         <outlet property="frequencyLabel" destination="GPq-Lh-g0C" id="XMe-se-mKZ"/>
                         <outlet property="motionLabel" destination="dQP-xy-Mz1" id="WQF-1c-tyV"/>
                         <outlet property="userView" destination="ae4-ut-M9n" id="VZx-5k-Zt5"/>

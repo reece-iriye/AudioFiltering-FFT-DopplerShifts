@@ -73,9 +73,8 @@ class ViewControllerB: UIViewController {
     
     // periodically, update the graph with refreshed FFT Data
     func update() {
-        updateGraph()
-        updateDecibels()
-        updateMovement()
+        self.updateGraph()
+        self.updateMovement()
     }
     
     func updateGraph() {
@@ -93,16 +92,12 @@ class ViewControllerB: UIViewController {
         }
         
     }
-    
-    func updateDecibels() {
-        decibelLabel.text = String(format: "Current Volume: %.0f decibels", doppler.getDecibels())
-    }
-    
+        
     func updateMovement() {
         let left = doppler.getLeftMovement()
         let right = doppler.getRightMovement()
         if(left && right) {
-            motionLabel.text = "Window size too small"
+            motionLabel.text = "No Movement"
         } else if(right) {
             motionLabel.text = "Moving Away!!!"
         } else if(left) {
