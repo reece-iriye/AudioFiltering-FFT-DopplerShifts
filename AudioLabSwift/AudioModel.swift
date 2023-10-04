@@ -86,18 +86,27 @@ class AudioModel {
             )
         }
     }
-    // Returns float values for two played frequencies
+    
+    // This function identifies and returns the frequencies of the two most prominent peaks
+    // in the FFT data, possibly corresponding to two played tones. Interpolation is employed
+    // to improve frequency resolution and more accurately determine the peak frequencies.
     func getTones() -> [Float] {
-        let f2 = Float(self.audioManager!.samplingRate) / Float(fftData.count)/2 // Sampling frequency/N
-        var max1:Float = 0.0 // First peak
-        var max2:Float = 0.0 // Second peak
+        // Calculate the frequency resolution (delta frequency between FFT bins)
+        let f2 = Float(self.audioManager!.samplingRate) / Float(fftData.count)/2 // (Sampling frequency / N)
         
-        var m2:Float = 0.0 // Maximum found
+        var max1:Float = 0.0  // Frequency of the first detected peak
+        var max2:Float = 0.0  // Frequency of the second detected peak
         
-        // Window size for peak finding, small window size to get frequencies within 50hz
+        var m2:Float = 0.0  // Used to store the value of the current local maximum in the FFT data
+
+        // Define the window size for localized peak finding. This window size allows
+        // us to detect peaks that are within 50Hz of each other.
         let windowSize = fftData.count / 1000
+        
         for i in 0..<1000 {
-            let startIdx = i * windowSize + 25
+            let startIdx = i * windowSize + 25  // Compute the starting index for the current window
+            
+            // Note: vDSP_maxv used pass by reference to adjust maximum value in the given Float array
             vDSP_maxv(
                 &fftData + startIdx,
                 1,
@@ -105,20 +114,28 @@ class AudioModel {
                 vDSP_Length(windowSize)
             )
             
-            let maxIndex = Int(fftData.firstIndex(of: m2)!) // Index of local Maximum
-            let m1 = fftData[max(maxIndex - 1, 0)] // Point before found maximum
-            let m3 = fftData[maxIndex + 1] // Point after found maximum
+            let maxIndex = Int(fftData.firstIndex(of: m2)!)  // Get the index of the found maximum
+            let m1 = fftData[max(maxIndex - 1, 0)]  // Value just before the maximum
+            let m3 = fftData[maxIndex + 1]  // Value just after the maximum
             
-            if(m2 > 0 && m1 < m2 && m2 > fftData[maxIndex + 1]){ // If max is positive and greater than surround point
-                if(max1 == 0.0){ // If first max has not been set
-                    max1 = Float(maxIndex)*f2 + (m1 - m3)/(m3 - 2*m2 + m1) * f2/2 // Set first max
+            // Quadratic interpolation: Using the detected peak and its neighbors,
+            // we can estimate the actual peak frequency with more precision.
+            // We do this by fitting a parabola through the three points and finding its vertex.
+            let interpolationFactor = (m1 - m3) / (m3 - 2*m2 + m1)
+            
+            // Check if the point is indeed a local maximum: its value should be positive
+            // and greater than both of its neighbors
+            if(m2 > 0 && m1 < m2 && m2 > m3){ // If max is positive and greater than surround point
+                if(max1 == 0.0){  // If the first peak hasn't been identified yet
+                    max1 = Float(maxIndex) * f2 + interpolationFactor * f2 / 2
                 }
-                else if(max2 == 0.0){ // If first max has been set and second max has not
-                    max2 = Float(maxIndex)*f2 + (m1 - m3)/(m3 - 2*m2 + m1) * f2/2 // Set second max
+                else if (max2 == 0.0) {  // If the second peak hasn't been identified yet
+                    max2 = Float(maxIndex) * f2 + interpolationFactor * f2 / 2
                 }
             }
         }
-        return [max1, max2] // Return found maximums
+        // Return the two detected peak frequencies
+        return [max1, max2]
     }
     
     //==========================================

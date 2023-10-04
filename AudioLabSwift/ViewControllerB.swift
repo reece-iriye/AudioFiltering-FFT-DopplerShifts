@@ -22,9 +22,9 @@ class ViewControllerB: UIViewController {
     // A slider UI element to allow the user to adjust the frequency
     // This helps in fine-tuning the frequency to achieve optimal motion detection
     @IBAction func frequencySlider(_ sender: UISlider) {
-        doppler.setFrequency(frequency: sender.value)
+        self.doppler.setFrequency(frequency: sender.value)
         // Update the frequency label to reflect the new frequency.
-        frequencyLabel.text = String(format: "%.0f Hz", sender.value)
+        self.frequencyLabel.text = String(format: "%.0f Hz", sender.value)
     }
     
     // Create an instance of the DopplerModel which will interpret the audio data
@@ -103,13 +103,13 @@ class ViewControllerB: UIViewController {
         let right = doppler.getRightMovement()
         if(left && right) {
             // Likely some sort of error state, defaulting visual in this case to "No Movement"
-            motionLabel.text = "No Movement"
+            self.motionLabel.text = "No Movement"
         } else if(right) {
-            motionLabel.text = "Moving Away!!!"
+            self.motionLabel.text = "Moving Away!!!"
         } else if(left) {
-            motionLabel.text = "Moving Towards!!!"
+            self.motionLabel.text = "Moving Towards!!!"
         } else {
-            motionLabel.text = "No Movement"
+            self.motionLabel.text = "No Movement"
         }
     }
 }

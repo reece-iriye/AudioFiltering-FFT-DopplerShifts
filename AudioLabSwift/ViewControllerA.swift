@@ -13,7 +13,7 @@ class ViewControllerA: UIViewController {
     
     @IBOutlet weak var maxLabel: UILabel!
     @IBAction func lockIn(_ sender: Any) {
-        lockIn = !lockIn
+        self.lockIn = !self.lockIn
     }
     
     // setup audio model
@@ -57,9 +57,6 @@ class ViewControllerA: UIViewController {
         Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { _ in
             // Update the graphs that can be seen in the View
             self.updateGraph()
-            
-            // Then, update the maximum frequencies that are recorded
-//            self.updateMaxFrequency()
         }
        
     }
@@ -68,19 +65,19 @@ class ViewControllerA: UIViewController {
         super.viewWillDisappear(animated)
         
         // Pause audio manager when navigating away
-        audio.pause()
+        self.audio.pause()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         // Play audio manager when navigating back
-        audio.play()
+        self.audio.play()
     }
     
     // periodically, update the graph with refreshed FFT Data
     func updateGraph() {
-        if(lockIn){ // If unlocked
+        if(self.lockIn){ // If unlocked
             if let graph = self.graph{
                 graph.updateGraph(
                     data: self.audio.fftData,
@@ -96,18 +93,18 @@ class ViewControllerA: UIViewController {
                 )
             }
             
-            // Get tones of playing frequencies
+            // Get maximum peaks of the playing frequencies
             let tones = self.audio.getTones()
             if(tones[0] == 0.0){ // Tell user if no tone is found
-                labelText = String(format: "No Frequencies Found")
+                self.labelText = String(format: "No Frequencies Found")
             }
             else if(tones[1] == 0.0){ // Display one frequency if second is not found
-                labelText = String(format: "One frequency: %.2f hz", tones[0])
+                self.labelText = String(format: "One frequency: %.2f hz", tones[0])
             }
             else{ // Otherwise, displayed the two found frequencies
-                labelText = String(format: "Two frequencies: %.2f, %.2f hz", tones[0], tones[1])
+                self.labelText = String(format: "Two frequencies: %.2f, %.2f hz", tones[0], tones[1])
             }
-            maxLabel.text = labelText // Update label text
+            self.maxLabel.text = self.labelText // Update label text
         }
     }
     

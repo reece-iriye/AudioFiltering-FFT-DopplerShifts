@@ -7,16 +7,19 @@
 
 import UIKit
 
+// The DopplerModel is responsible for processing audio data and determining
+// motion based on the Doppler effect
 class DopplerModel: NSObject {
-    //variables for producing specific frequency
+    // Constants and variables for generating specific sine wave frequency
     private var SINE_FREQUENCY:Float
     private var phase:Float = 0.0
     private var phaseIncrement:Float = 0.0
     private var sineWaveRepeatMax:Float = Float(2*Double.pi)
     
+    // Store the decibel value
     private var decibels:Float
     
-    
+    // Variables for buffer and motion detection
     private var BUFFER_SIZE:Int
     private var peakIndex:Int
     private var motionWindow:Int
@@ -24,14 +27,17 @@ class DopplerModel: NSObject {
     private var rightMovement:Bool
     private var checkMotion:Bool
     
+    // Arrays to store audio time, FFT, and decibel data.
     var timeData:[Float]
     var fftData:[Float]
     var decibelData:[Float]
     
+    // Sampling rate of audio
     lazy var samplingRate:Int = {
         return Int(self.audioManager!.samplingRate)
     }()
     
+    // Initialization of the DopplerModel with buffer size and sine frequency
     init(buffer_size:Int, sineFrequency:Float) {
         BUFFER_SIZE = buffer_size
         timeData = Array.init(repeating: 0.0, count: BUFFER_SIZE)
@@ -43,84 +49,75 @@ class DopplerModel: NSObject {
         motionWindow = 10
         leftMovement = false
         rightMovement = false
-        checkMotion = true
-        // anything not lazily instatntiated should be allocated here
-        
-        
-        //timeData = Array.init(repeating: 0.0, count: BUFFER_SIZE)
-        //fftData = Array.init(repeating: 0.0, count: BUFFER_SIZE/2)
-        //maxDataSize20 = Array.init(repeating: 0.0, count: 20)
+        checkMotion = true        
     }
     
-    func setDecibels(decibel_read:Float) {
-        decibels = decibel_read
+    // Getters and setters for controller to access on changing view label
+    func getLeftMovement() -> Bool {
+        return self.leftMovement
     }
     
-    func getDecibels() ->Float {
-        return self.decibels
-    }
-    
-    func getLeftMovement() ->Bool {
-        return leftMovement
-    }
-    
-    func getRightMovement() ->Bool {
-        return rightMovement
-    }
-    
-    func calculateDecibelData() {
-        self.peakIndex = 0
-        for i in 0...(fftData.count-1) {
-            if(i > fftData.count/2) && (fftData[i] > fftData[peakIndex]) {
-                peakIndex = i
-            }
-            if(fftData[i] != 0 && !fftData[i].isInfinite){
-                decibelData[i] = log10(2*(fftData[i]*fftData[i]))
-                if decibelData[i] > decibels {
-                    decibels = decibelData[i]
-                }
-            } else {
-                decibelData[i] = 0;
-            }
-        }
+    func getRightMovement() -> Bool {
+        return self.rightMovement
     }
     
     func calculateMotion() {
-        let rightMotion = max(0, peakIndex-motionWindow)
-        let leftMotion = min(decibelData.count-1, peakIndex+motionWindow)
-        //print(String(format: "Left Motion: %.0f", fftData[leftMotion]))
-        //print(String(format: "Peak: %.0f", fftData[peakIndex]))
-        //print(String(format: "Right Motion: %.0f", fftData[rightMotion]))
-        guard let sample = audioManager?.samplingRate else{
+        // Determine the indices for the right and left of the peak in the FFT data,
+        // considering the size of the motionWindow.
+        let rightMotion = max(0, self.peakIndex - self.motionWindow)
+        let leftMotion = min(self.decibelData.count-1, self.peakIndex+motionWindow)
+
+        // Ensure that we have a sampling rate from the audio manager.
+        guard let sample = self.audioManager?.samplingRate else {
             return
         }
-        print(sample/Double(fftData.count))
-        if(checkMotion) {
-            if((fftData[peakIndex] - fftData[rightMotion]) < 35 && (fftData[rightMotion] - fftData[leftMotion]) > 25){
-                rightMovement = true
-                leftMovement = false
-                checkMotion = false
-                
-            } else if((fftData[peakIndex] - fftData[leftMotion]) < 35 && (fftData[leftMotion] - fftData[rightMotion]) > 25){
-                leftMovement = true
-                rightMovement = false
-                checkMotion = false
-                
-            } else if((fftData[peakIndex] - fftData[leftMotion]) < 35 && (fftData[peakIndex] - fftData[rightMotion]) < 35){
-                leftMovement = true
-                rightMovement = true
-                checkMotion = false
+        
+        // Check if motion determination is currently allowed (sometimes disables to ensure sampling
+        // isn't too frequent)
+        // ⭐: The numbers 35 and 25 were arbitrarily used, as they tended to capture correct motions
+        //      in testing
+        if(self.checkMotion) {
+            if((self.fftData[peakIndex] - self.fftData[rightMotion]) < 35
+               && (self.fftData[rightMotion] - self.fftData[leftMotion]) > 25) {
+                // Determine if the movement is to the right.
+                // If the difference between the peak and the value to its right is below 35,
+                // and the difference between the value to its right and the value to its left is above 25,
+                // we can consider it a rightward movement.
+                self.rightMovement = true
+                self.leftMovement = false
+                self.checkMotion = false
+            } else if((self.fftData[self.peakIndex] - self.fftData[leftMotion]) < 35
+                      && (self.fftData[leftMotion] - self.fftData[rightMotion]) > 25) {
+                // Determine if the movement is to the left.
+                // Similar logic, but looking at the difference between the peak and its left,
+                // and the difference between its left and right.
+                self.leftMovement = true
+                self.rightMovement = false
+                self.checkMotion = false
+            } else if((self.fftData[peakIndex] - self.fftData[leftMotion]) < 35 && (self.fftData[self.peakIndex] - fftData[rightMotion]) < 35){
+                // Determine if there is movement in both directions.
+                // If the differences from the peak to both the left and right are below 35,
+                // it indicates simultaneous movement in both directions, which is an error state that
+                // we track as lack of movement for the user to see.
+                self.leftMovement = true
+                self.rightMovement = true
+                self.checkMotion = false
             } else{
-                leftMovement = false
-                rightMovement = false
+                // If none of the above conditions are met, then there's no detectable movement
+                self.leftMovement = false
+                self.rightMovement = false
             }
         } else{
+            // If motion determination is currently not allowed,
+            // set a timer to enable motion checking after a 0.5-second delay.
+            // This is to avoid rapidly toggling motion detection.
             Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
                 self.checkMotion = true
             }
         }
     }
     
+    // Getters and setters for sine frequency in playing audio
     func setFrequency(frequency:Float) {
         SINE_FREQUENCY = frequency
     }
@@ -128,6 +125,7 @@ class DopplerModel: NSObject {
     func getFrequency() ->Float {
         return self.SINE_FREQUENCY
     }
+   
     
     // public function for starting processing of microphone data
     func startMicrophoneProcessing(withFps:Double) {
@@ -178,12 +176,11 @@ class DopplerModel: NSObject {
                                              withNumSamples: Int64(BUFFER_SIZE))
             
             // now take FFT
-            fftHelper!.performForwardFFT(withData: &timeData,
+            self.fftHelper!.performForwardFFT(withData: &timeData,
                                          andCopydBMagnitudeToBuffer: &fftData) // fft result is copied into fftData array
             
-            calculateDecibelData()
             
-            calculateMotion()
+            self.calculateMotion()
             // at this point, we have saved the data to the arrays:
             //   timeData: the raw audio samples
             //   fftData:  the FFT of those same samples
@@ -202,32 +199,38 @@ class DopplerModel: NSObject {
     }
     
     private func handleSpeakerQueryWithSinusoids(data:Optional<UnsafeMutablePointer<Float>>, numFrames:UInt32, numChannels: UInt32){
-            if let arrayData = data, let manager = self.audioManager{
-                let addFreq:Float = 0
-                let mult:Float = 1.0
-                phaseIncrement = Float(2*Double.pi*Double(SINE_FREQUENCY+addFreq)/manager.samplingRate)
+        // Check if data exists and if the audio manager is set
+        if let arrayData = data, let manager = self.audioManager{
+            // An optional frequency adjustment; by default, it's 0
+            let addFreq:Float = 0
+            
+            // A multiplier that can be used to adjust the amplitude of the sine wave.
+            // Currently, it's set to 10.
+            let mult:Float = 10.0
+            
+            // Calculate the phase increment based on the desired frequency
+            // The phase increment determines how much we should increase the phase for each sample to produce the desired frequency
+            phaseIncrement = Float(2*Double.pi*Double(SINE_FREQUENCY+addFreq)/manager.samplingRate)
+            
+            
+            var i = 0
+            let chan = Int(numChannels)
+            let frame = Int(numFrames)
+
+            // For each audio frame...
+            while i<frame {
+                // Generate a sine wave sample at the current phase, and adjust its amplitude using 'mult'.
+                arrayData[i] = sin(phase)*mult
                 
+                // Increase the phase by the precomputed increment.
+                phase += phaseIncrement
                 
-                var i = 0
-                let chan = Int(numChannels)
-                let frame = Int(numFrames)
-                if chan==1{
-                    while i<frame{
-                        arrayData[i] = 10*sin(phase)*mult
-                        phase += phaseIncrement
-                        if (phase >= sineWaveRepeatMax) { phase -= sineWaveRepeatMax }
-                        i+=1
-                    }
-                }else if chan==2{
-                    let len = frame*chan
-                    while i<len{
-                        arrayData[i] = 10*sin(phase)*mult
-                        arrayData[i+1] = arrayData[i]
-                        phase += phaseIncrement
-                        if (phase >= sineWaveRepeatMax) { phase -= sineWaveRepeatMax }
-                        i+=2
-                    }
-                }
+                // If the phase goes beyond our maximum, wrap it around (essentially keeping the phase between 0 and 2*Pi).
+                if (phase >= sineWaveRepeatMax) { phase -= sineWaveRepeatMax }
+                
+                i+=1
             }
+
         }
+    }
 }
