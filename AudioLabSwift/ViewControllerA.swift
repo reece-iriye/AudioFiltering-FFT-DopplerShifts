@@ -3,8 +3,8 @@ import Metal
 
 
 class ViewControllerA: UIViewController {
-    var lockIn:Bool = true
-    var labelText:String = "0.0 fkasdjhfalskjfhlsakjfasdlkjfhaslkd"
+    var lockIn:Bool = true // Bool to lock into frequency
+    var labelText:String = "No Frequencies Found"
 
     @IBOutlet weak var userView: UIView!
     struct AudioConstants{
@@ -74,35 +74,36 @@ class ViewControllerA: UIViewController {
         audio.play()
     }
     
-    var counter:Int = 31
     // periodically, update the graph with refreshed FFT Data
     func updateGraph() {
-        
-        if let graph = self.graph{
-            graph.updateGraph(
-                data: self.audio.fftData,
-                forKey: "fft"
-            )
+        if(lockIn){ // If unlocked
+            if let graph = self.graph{
+                graph.updateGraph(
+                    data: self.audio.fftData,
+                    forKey: "fft"
+                )
+                graph.updateGraph(
+                    data: self.audio.timeData,
+                    forKey: "time"
+                )
+                graph.updateGraph(
+                    data: self.audio.maxDataSize20,
+                    forKey: "bufferSize20Graph"
+                )
+            }
             
-            graph.updateGraph(
-                data: self.audio.timeData,
-                forKey: "time"
-            )
-            
-            graph.updateGraph(
-                data: self.audio.maxDataSize20,
-                forKey: "bufferSize20Graph"
-            )
-        }
-        if(lockIn && counter > 10){
-            let tone = self.audio.getTone()
-            labelText = String(format: "Frequencies: %.2f, %.2f hz", tone[0], tone[1])
-            maxLabel.text = labelText
-            counter = 0
-        }
-        else{
-            counter += 1;
-            maxLabel.text = labelText
+            // Get tones of playing frequencies
+            let tones = self.audio.getTones()
+            if(tones[0] == 0.0){ // Tell user if no tone is found
+                labelText = String(format: "No Frequencies Found")
+            }
+            else if(tones[1] == 0.0){ // Display one frequency if second is not found
+                labelText = String(format: "One frequency: %.2f hz", tones[0])
+            }
+            else{ // Otherwise, displayed the two found frequencies
+                labelText = String(format: "Two frequencies: %.2f, %.2f hz", tones[0], tones[1])
+            }
+            maxLabel.text = labelText // Update label text
         }
     }
 }
