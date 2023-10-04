@@ -23,7 +23,6 @@ class AudioModel {
     // MARK: Public Methods
     init(buffer_size:Int) {
         BUFFER_SIZE = buffer_size
-        // anything not lazily instatntiated should be allocated here
         timeData = Array.init(repeating: 0.0, count: BUFFER_SIZE)
         fftData = Array.init(repeating: 0.0, count: BUFFER_SIZE/2)
         maxDataSize20 = Array.init(repeating: 0.0, count: 20)
@@ -87,37 +86,39 @@ class AudioModel {
             )
         }
     }
-    
-    func getTone() -> [Float] {
+    // Returns float values for two played frequencies
+    func getTones() -> [Float] {
+        let f2 = Float(self.audioManager!.samplingRate) / Float(fftData.count)/2 // Sampling frequency/N
+        var max1:Float = 0.0 // First peak
+        var max2:Float = 0.0 // Second peak
         
-        let f2 = Float(self.audioManager!.samplingRate) / Float(fftData.count)
-        var max1:Float = 0.0
-        var max2:Float = 0.0
+        var m2:Float = 0.0 // Maximum found
         
-        var m2:Float = 0.0
-        let windowSize = fftData.count / 100
-        for i in 0..<100 {
-            let startIdx = i * windowSize
+        // Window size for peak finding, small window size to get frequencies within 50hz
+        let windowSize = fftData.count / 1000
+        for i in 0..<1000 {
+            let startIdx = i * windowSize + 25
             vDSP_maxv(
                 &fftData + startIdx,
                 1,
                 &m2,
                 vDSP_Length(windowSize)
             )
+            
             let maxIndex = Int(fftData.firstIndex(of: m2)!) // Index of local Maximum
-            let m1 = fftData[max(maxIndex - 1, 0)]
-            let m3 = fftData[maxIndex + 1]
-            if(m2 > 0 && m1 < m2 && m2 > fftData[maxIndex + 1]){ // If value is positive and true local max
-                if(max1 == 0.0){
-                    max1 = Float(maxIndex)*f2 + (m1 - m3)/(m3 - 2*m2 + m1) * f2/2
+            let m1 = fftData[max(maxIndex - 1, 0)] // Point before found maximum
+            let m3 = fftData[maxIndex + 1] // Point after found maximum
+            
+            if(m2 > 0 && m1 < m2 && m2 > fftData[maxIndex + 1]){ // If max is positive and greater than surround point
+                if(max1 == 0.0){ // If first max has not been set
+                    max1 = Float(maxIndex)*f2 + (m1 - m3)/(m3 - 2*m2 + m1) * f2/2 // Set first max
                 }
-                else if(max2 == 0.0){
-                    max2 = Float(maxIndex)*f2 + (m1 - m3)/(m3 - 2*m2 + m1) * f2/2
+                else if(max2 == 0.0){ // If first max has been set and second max has not
+                    max2 = Float(maxIndex)*f2 + (m1 - m3)/(m3 - 2*m2 + m1) * f2/2 // Set second max
                 }
             }
         }
-        
-        return [max1, max2]
+        return [max1, max2] // Return found maximums
     }
     
     //==========================================
