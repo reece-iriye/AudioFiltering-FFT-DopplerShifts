@@ -98,7 +98,7 @@ class ViewControllerB: UIViewController {
         // 'left' indicates an abnormal pattern to the left of the peak, suggesting
         //      hand is moving towards the phone
         // 'right' indicates an abnormal pattern to the right of the peak, suggesting
-        //      hand is moving towards the phone        
+        //      hand is moving away from the phone        
         let left = doppler.getLeftMovement()
         let right = doppler.getRightMovement()
         if(left && right) {
