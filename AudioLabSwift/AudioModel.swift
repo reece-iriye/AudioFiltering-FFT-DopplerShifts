@@ -44,9 +44,10 @@ class AudioModel {
         }
     }
     
-    func startProcesingAudioFileForPlayback(){
+    /*func startProcesingAudioFileForPlayback(){
         self.audioManager?.outputBlock = self.handleSpeakerQueryWithAudioFile
 //        self.audioManager?.inputBlock = self.handleSpeaker
+     
         
         Timer.scheduledTimer(withTimeInterval: 1.0/20, repeats: true) { _ in
             self.runEveryInterval()
@@ -54,7 +55,7 @@ class AudioModel {
         
         self.fileReader?.play()
     }
-    
+    */
     // You must call this when you want the audio to start being handled by our model
     func play(){
         if let manager = self.audioManager{
@@ -179,7 +180,7 @@ class AudioModel {
         }
     }
     
-    private func handleMicrophone (data:Optional<UnsafeMutablePointer<Float>>, numFrames:UInt32, numChannels: UInt32) {
+    private func handleMicrophone(data:Optional<UnsafeMutablePointer<Float>>, numFrames:UInt32, numChannels: UInt32) {
         // copy samples from the microphone into circular buffer
         self.inputBuffer?.addNewFloatData(data, withNumSamples: Int64(numFrames))
     }

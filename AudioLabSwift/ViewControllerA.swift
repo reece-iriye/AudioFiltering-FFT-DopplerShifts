@@ -55,7 +55,11 @@ class ViewControllerA: UIViewController {
         
         // run the loop for updating the graph peridocially
         Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { _ in
+            // Update the graphs that can be seen in the View
             self.updateGraph()
+            
+            // Then, update the maximum frequencies that are recorded
+            self.updateMaxFrequency()
         }
        
     }
@@ -106,4 +110,5 @@ class ViewControllerA: UIViewController {
             maxLabel.text = labelText // Update label text
         }
     }
+    
 }
