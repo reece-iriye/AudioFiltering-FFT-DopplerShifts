@@ -59,7 +59,7 @@ class ViewControllerA: UIViewController {
             self.updateGraph()
             
             // Then, update the maximum frequencies that are recorded
-            self.updateMaxFrequency()
+//            self.updateMaxFrequency()
         }
        
     }
