@@ -14,12 +14,13 @@ class DopplerModel: NSObject {
     private var phaseIncrement:Float = 0.0
     private var sineWaveRepeatMax:Float = Float(2*Double.pi)
     
-    private var decibels:Int
+    private var decibels:Float
     
     
     private var BUFFER_SIZE:Int
     var timeData:[Float]
     var fftData:[Float]
+    var decibelData:[Float]
     
     lazy var samplingRate:Int = {
         return Int(self.audioManager!.samplingRate)
@@ -29,6 +30,7 @@ class DopplerModel: NSObject {
         BUFFER_SIZE = buffer_size
         timeData = Array.init(repeating: 0.0, count: BUFFER_SIZE)
         fftData = Array.init(repeating: 0.0, count: BUFFER_SIZE/2)
+        decibelData = Array.init(repeating: 0.0, count: BUFFER_SIZE/2)
         SINE_FREQUENCY = sineFrequency
         decibels = 0
         // anything not lazily instatntiated should be allocated here
@@ -39,13 +41,28 @@ class DopplerModel: NSObject {
         //maxDataSize20 = Array.init(repeating: 0.0, count: 20)
     }
     
-    func setDecibels(decibel_read:Int) {
+    func setDecibels(decibel_read:Float) {
         decibels = decibel_read
     }
     
-    func getDecibels() ->Int {
+    func getDecibels() ->Float {
         return self.decibels
     }
+    
+    func calculateDecibelData() {
+            for i in 0...fftData.count-1 {
+                print(fftData[i])
+                if(fftData[i] != 0 && !fftData[i].isInfinite){
+                    decibelData[i] = 20*log10(abs(fftData[i]))
+                    if decibelData[i] > decibels {
+                        decibels = decibelData[i]
+                        print(decibelData[i])
+                    }
+                } else {
+                    decibelData[i] = 0;
+                }
+            }
+        }
     
     func setFrequency(frequency:Float) {
         SINE_FREQUENCY = frequency
@@ -107,6 +124,7 @@ class DopplerModel: NSObject {
             fftHelper!.performForwardFFT(withData: &timeData,
                                          andCopydBMagnitudeToBuffer: &fftData) // fft result is copied into fftData array
             
+            calculateDecibelData()
             // at this point, we have saved the data to the arrays:
             //   timeData: the raw audio samples
             //   fftData:  the FFT of those same samples
