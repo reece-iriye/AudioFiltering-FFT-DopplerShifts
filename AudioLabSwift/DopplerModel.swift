@@ -119,7 +119,7 @@ class DopplerModel: NSObject {
     
     // Getters and setters for sine frequency in playing audio
     func setFrequency(frequency:Float) {
-        SINE_FREQUENCY = frequency
+        self.SINE_FREQUENCY = frequency
     }
     
     func getFrequency() ->Float {
@@ -179,13 +179,8 @@ class DopplerModel: NSObject {
             self.fftHelper!.performForwardFFT(withData: &timeData,
                                          andCopydBMagnitudeToBuffer: &fftData) // fft result is copied into fftData array
             
-            
-            self.calculateMotion()
-            // at this point, we have saved the data to the arrays:
-            //   timeData: the raw audio samples
-            //   fftData:  the FFT of those same samples
-            // the user can now use these variables however they like
-            
+            //now calculate the doppler effect
+            self.calculateMotion()            
         }
     }
     
