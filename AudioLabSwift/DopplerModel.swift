@@ -18,6 +18,11 @@ class DopplerModel: NSObject {
     
     
     private var BUFFER_SIZE:Int
+    private var peakIndex:Int
+    private var motionWindow:Int
+    private var leftMovement:Bool
+    private var rightMovement:Bool
+    
     var timeData:[Float]
     var fftData:[Float]
     var decibelData:[Float]
@@ -33,6 +38,10 @@ class DopplerModel: NSObject {
         decibelData = Array.init(repeating: 0.0, count: BUFFER_SIZE/2)
         SINE_FREQUENCY = sineFrequency
         decibels = 0
+        peakIndex = 0
+        motionWindow = 25
+        leftMovement = false
+        rightMovement = false
         // anything not lazily instatntiated should be allocated here
         
         
@@ -49,20 +58,47 @@ class DopplerModel: NSObject {
         return self.decibels
     }
     
+    func getLeftMovement() ->Bool {
+        return leftMovement
+    }
+    
+    func getRightMovement() ->Bool {
+        return rightMovement
+    }
+    
     func calculateDecibelData() {
+            peakIndex = 0
             for i in 0...fftData.count-1 {
-                print(fftData[i])
+                if(fftData[i] > fftData[peakIndex]) {
+                    peakIndex = i
+                }
                 if(fftData[i] != 0 && !fftData[i].isInfinite){
                     decibelData[i] = 20*log10(abs(fftData[i]))
+                    print(fftData[i])
                     if decibelData[i] > decibels {
                         decibels = decibelData[i]
-                        print(decibelData[i])
                     }
                 } else {
                     decibelData[i] = 0;
                 }
             }
+    }
+    
+    func calculateMotion() {
+        let rightMotion = max(0, peakIndex-motionWindow)
+        let leftMotion = min(decibelData.count-1, peakIndex+motionWindow)
+        
+        if(fftData[rightMotion] > 0){
+            rightMovement = true;
+        } else{
+            rightMovement = false;
         }
+        if(fftData[leftMotion] > 0){
+            leftMovement = true;
+        } else{
+            leftMovement = false;
+        }
+    }
     
     func setFrequency(frequency:Float) {
         SINE_FREQUENCY = frequency
@@ -125,6 +161,8 @@ class DopplerModel: NSObject {
                                          andCopydBMagnitudeToBuffer: &fftData) // fft result is copied into fftData array
             
             calculateDecibelData()
+            
+            calculateMotion()
             // at this point, we have saved the data to the arrays:
             //   timeData: the raw audio samples
             //   fftData:  the FFT of those same samples

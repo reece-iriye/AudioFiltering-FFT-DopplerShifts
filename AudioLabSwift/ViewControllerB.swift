@@ -7,6 +7,8 @@ class ViewControllerB: UIViewController {
         static let AUDIO_BUFFER_SIZE = 1024*4
     }
     
+    @IBOutlet weak var motionLabel: UILabel!
+    
     @IBOutlet weak var frequencyLabel: UILabel!
     
     @IBOutlet weak var decibelLabel: UILabel!
@@ -76,6 +78,7 @@ class ViewControllerB: UIViewController {
     func update() {
         updateGraph()
         updateDecibels()
+        updateMovement()
     }
     
     func updateGraph() {
@@ -96,5 +99,19 @@ class ViewControllerB: UIViewController {
     
     func updateDecibels() {
         decibelLabel.text = String(format: "Current Volume: %.0f decibels", doppler.getDecibels())
+    }
+    
+    func updateMovement() {
+        let left = doppler.getLeftMovement()
+        let right = doppler.getRightMovement()
+        if(left && right) {
+            motionLabel.text = "Window size too small"
+        } else if(right) {
+            motionLabel.text = "Moving Away!!!"
+        } else if(left) {
+            motionLabel.text = "Moving Towards!!!"
+        } else {
+            motionLabel.text = "No Movement"
+        }
     }
 }
