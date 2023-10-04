@@ -57,7 +57,7 @@ class ViewControllerB: UIViewController {
         }
     }
     
-    /*override func viewWillDisappear(_ animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
         // Pause audio manager when navigating away
@@ -69,7 +69,7 @@ class ViewControllerB: UIViewController {
         
         // Play audio manager when navigating back
         audio.play()
-    }*/
+    }
     
     // periodically, update the graph with refreshed FFT Data
     func update() {
