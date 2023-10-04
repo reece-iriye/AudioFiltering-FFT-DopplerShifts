@@ -22,6 +22,7 @@ class DopplerModel: NSObject {
     private var motionWindow:Int
     private var leftMovement:Bool
     private var rightMovement:Bool
+    private var checkMotion:Bool
     
     var timeData:[Float]
     var fftData:[Float]
@@ -39,9 +40,10 @@ class DopplerModel: NSObject {
         SINE_FREQUENCY = sineFrequency
         decibels = 0
         peakIndex = 0
-        motionWindow = 25
+        motionWindow = 10
         leftMovement = false
         rightMovement = false
+        checkMotion = true
         // anything not lazily instatntiated should be allocated here
         
         
@@ -67,36 +69,55 @@ class DopplerModel: NSObject {
     }
     
     func calculateDecibelData() {
-            peakIndex = 0
-            for i in 0...fftData.count-1 {
-                if(fftData[i] > fftData[peakIndex]) {
-                    peakIndex = i
-                }
-                if(fftData[i] != 0 && !fftData[i].isInfinite){
-                    decibelData[i] = 20*log10(abs(fftData[i]))
-                    print(fftData[i])
-                    if decibelData[i] > decibels {
-                        decibels = decibelData[i]
-                    }
-                } else {
-                    decibelData[i] = 0;
-                }
+        self.peakIndex = 0
+        for i in 0...(fftData.count-1) {
+            if(i > fftData.count/2) && (fftData[i] > fftData[peakIndex]) {
+                peakIndex = i
             }
+            if(fftData[i] != 0 && !fftData[i].isInfinite){
+                decibelData[i] = log10(2*(fftData[i]*fftData[i]))
+                if decibelData[i] > decibels {
+                    decibels = decibelData[i]
+                }
+            } else {
+                decibelData[i] = 0;
+            }
+        }
     }
     
     func calculateMotion() {
         let rightMotion = max(0, peakIndex-motionWindow)
         let leftMotion = min(decibelData.count-1, peakIndex+motionWindow)
-        
-        if(fftData[rightMotion] > 0){
-            rightMovement = true;
-        } else{
-            rightMovement = false;
+        //print(String(format: "Left Motion: %.0f", fftData[leftMotion]))
+        //print(String(format: "Peak: %.0f", fftData[peakIndex]))
+        //print(String(format: "Right Motion: %.0f", fftData[rightMotion]))
+        guard let sample = audioManager?.samplingRate else{
+            return
         }
-        if(fftData[leftMotion] > 0){
-            leftMovement = true;
+        print(sample/Double(fftData.count))
+        if(checkMotion) {
+            if((fftData[peakIndex] - fftData[rightMotion]) < 35 && (fftData[rightMotion] - fftData[leftMotion]) > 25){
+                rightMovement = true
+                leftMovement = false
+                checkMotion = false
+                
+            } else if((fftData[peakIndex] - fftData[leftMotion]) < 35 && (fftData[leftMotion] - fftData[rightMotion]) > 25){
+                leftMovement = true
+                rightMovement = false
+                checkMotion = false
+                
+            } else if((fftData[peakIndex] - fftData[leftMotion]) < 35 && (fftData[peakIndex] - fftData[rightMotion]) < 35){
+                leftMovement = true
+                rightMovement = true
+                checkMotion = false
+            } else{
+                leftMovement = false
+                rightMovement = false
+            }
         } else{
-            leftMovement = false;
+            Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
+                self.checkMotion = true
+            }
         }
     }
     
@@ -192,7 +213,7 @@ class DopplerModel: NSObject {
                 let frame = Int(numFrames)
                 if chan==1{
                     while i<frame{
-                        arrayData[i] = sin(phase)*mult
+                        arrayData[i] = 10*sin(phase)*mult
                         phase += phaseIncrement
                         if (phase >= sineWaveRepeatMax) { phase -= sineWaveRepeatMax }
                         i+=1
@@ -200,7 +221,7 @@ class DopplerModel: NSObject {
                 }else if chan==2{
                     let len = frame*chan
                     while i<len{
-                        arrayData[i] = sin(phase)*mult
+                        arrayData[i] = 10*sin(phase)*mult
                         arrayData[i+1] = arrayData[i]
                         phase += phaseIncrement
                         if (phase >= sineWaveRepeatMax) { phase -= sineWaveRepeatMax }

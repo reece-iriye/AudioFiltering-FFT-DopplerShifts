@@ -4,7 +4,7 @@ import UIKit
 class ViewControllerB: UIViewController {
     @IBOutlet weak var userView: UIView!
     struct AudioConstants {
-        static let AUDIO_BUFFER_SIZE = 1024*4
+        static let AUDIO_BUFFER_SIZE = 4096*4
     }
     
     @IBOutlet weak var motionLabel: UILabel!
@@ -32,8 +32,6 @@ class ViewControllerB: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        doppler.setFrequency(frequency: 300)
-        
         if let graph = self.graph{
             graph.setBackgroundColor(r: 0, g: 0, b: 0, a: 1)
             
@@ -57,7 +55,6 @@ class ViewControllerB: UIViewController {
         Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { _ in
             self.update()
         }
-       
     }
     
     /*override func viewWillDisappear(_ animated: Bool) {
