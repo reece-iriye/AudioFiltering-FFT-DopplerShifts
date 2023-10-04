@@ -78,30 +78,30 @@ class ViewControllerA: UIViewController {
     // periodically, update the graph with refreshed FFT Data
     func updateGraph() {
         
-        if let graph = self.graph{
-            graph.updateGraph(
-                data: self.audio.fftData,
-                forKey: "fft"
-            )
-            
-            graph.updateGraph(
-                data: self.audio.timeData,
-                forKey: "time"
-            )
-            
-            graph.updateGraph(
-                data: self.audio.maxDataSize20,
-                forKey: "bufferSize20Graph"
-            )
-        }
-        if(lockIn && counter > 10){
-            let tone = self.audio.getTone()
-            labelText = String(format: "Frequencies: %.2f, %.2f hz", tone[0], tone[1])
-            maxLabel.text = labelText
-            counter = 0
+        if(lockIn){
+            if let graph = self.graph{
+                graph.updateGraph(
+                    data: self.audio.fftData,
+                    forKey: "fft"
+                )
+                graph.updateGraph(
+                    data: self.audio.timeData,
+                    forKey: "time"
+                )
+                graph.updateGraph(
+                    data: self.audio.maxDataSize20,
+                    forKey: "bufferSize20Graph"
+                )
+            }
+            if(counter > 10){
+                let tone = self.audio.getTone()
+                labelText = String(format: "Frequencies: %.2f, %.2f hz", tone[0], tone[1])
+                maxLabel.text = labelText
+                counter = 0
+            }
+            counter += 1;
         }
         else{
-            counter += 1;
             maxLabel.text = labelText
         }
     }

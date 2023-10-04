@@ -93,9 +93,9 @@ class AudioModel {
         var max2:Float = 0.0
         
         var m2:Float = 0.0
-        let windowSize = fftData.count / 100
-        for i in 0..<100 {
-            let startIdx = i * windowSize
+        let windowSize = fftData.count / 1000
+        for i in 0..<1000 {
+            let startIdx = i * windowSize + 25
             vDSP_maxv(
                 &fftData + startIdx,
                 1,
